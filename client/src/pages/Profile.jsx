@@ -1,18 +1,30 @@
-import { useSelector } from 'react-redux';
-import { useRef, useState, useEffect } from 'react';
-import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
-import { app } from '../firebase';
-import { updateUserStart, updateUserSuccess, updateUserFailure, deleteUserFailure, deleteUserStart, deleteUserSuccess, signOutUserStart } from '../redux/user/userSlice';
-import { useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { useSelector } from "react-redux";
+import { useRef, useState, useEffect } from "react";
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
+import { app } from "../firebase";
+import {
+  updateUserStart,
+  updateUserSuccess,
+  updateUserFailure,
+  deleteUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  signOutUserStart,
+} from "../redux/user/userSlice";
+import { useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
 import { AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
 
-
 export default function Profile() {
-  const fileRef = useRef(null)
-  const {currentUser, loading, error} = useSelector((state) => state.user)
+  const fileRef = useRef(null);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
   const [file, setFile] = useState(undefined);
-  const [filePerc, setFilePerc] =  useState(0);
+  const [filePerc, setFilePerc] = useState(0);
   const [fileUploadError, setFileUploadError] = useState(false);
   const [formData, setFormData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
@@ -21,20 +33,22 @@ export default function Profile() {
   const [userListings, setUserListing] = useState([]);
 
   useEffect(() => {
-    if(file){
+    if (file) {
       handleFileUpload(file);
     }
-  },[file]);
+  }, [file]);
 
   const handleFileUpload = (file) => {
     const storage = getStorage(app);
     const fileName = new Date().getTime() + file.name;
     const storageRef = ref(storage, fileName);
     const uploadTask = uploadBytesResumable(storageRef, file);
-  
-    uploadTask.on('state_changed',
+
+    uploadTask.on(
+      "state_changed",
       (snapshot) => {
-        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         setFilePerc(Math.round(progress));
       },
       (error) => {
@@ -47,89 +61,107 @@ export default function Profile() {
       }
     );
   };
-  
-  const handleChange = (e) =>{
-    setFormData({...formData, [e.target.id]: e.target.value});
-  }
 
-  const handleSubmit = async(e) => {
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    try{
+    try {
       dispatch(updateUserStart());
-      const res = await fetch(`/api/user/update/${currentUser._id}`,{
-        method: 'POST',
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
       const data = await res.json();
 
-      if(data.success === false){
+      if (data.success === false) {
         dispatch(updateUserFailure(data.message));
         return;
       }
 
       dispatch(updateUserSuccess(data));
       setUpdateSuccess(true);
-    } 
-    catch(error){
+    } catch (error) {
       dispatch(updateUserFailure(error.message));
     }
-  }
+  };
 
-  const handleDeleteUser = async() => {
-    try{
+  const handleDeleteUser = async () => {
+    try {
       dispatch(deleteUserStart());
-      const res = await fetch(`/api/user/delete/${currentUser._id}`,{
-        method: 'DELETE',
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: "DELETE",
       });
       const data = await res.json();
-      if(data.success === false){
+      if (data.success === false) {
         dispatch(deleteUserFailure(data.message));
         return;
       }
       dispatch(deleteUserSuccess(data));
-    } catch (error){
+    } catch (error) {
       dispatch(deleteUserFailure(error.message));
     }
   };
 
   const handleSignOut = async () => {
-    try{
+    try {
       dispatch(signOutUserStart());
-      const res = await fetch('/api/auth/signout');
+      const res = await fetch("/api/auth/signout");
       const data = await res.json();
-      if(data.success === false) {
+      if (data.success === false) {
         dispatch(deleteUserFailure(data.message));
         return;
       }
       dispatch(deleteUserSuccess());
-
-    } catch(error){
+    } catch (error) {
       dispatch(deleteUserFailure(error.message));
     }
   };
 
   const handleShowListing = async () => {
-    try{
+    try {
       setShowListingError(false);
       const res = await fetch(`/api/user/listings/${currentUser._id}`);
       const data = await res.json();
-      if(data.success === false){
+      if (data.success === false) {
         setShowListingError(true);
         return;
       }
       setUserListing(data);
-    } catch (error){
+    } catch (error) {
+      console.log(error);
       setShowListingError(true);
     }
   };
- 
+
+  const handleListingDelete = async (listingId) => {
+    try {
+      const res = await fetch(`/api/listing/delete/${listingId}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (data.success === false) {
+        console.log(data.message);
+        return;
+      }
+      setUserListing((prev) =>
+        prev.filter((listing) => listing._id !== listingId)
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-1">
         <input
           onChange={(e) => setFile(e.target.files[0])}
           type="file"
@@ -215,41 +247,45 @@ export default function Profile() {
         {showListingError ? "Error showing listing" : ""}
       </p>
 
-      {userListings &&
-        userListings.length > 0 &&
-          <div className='flex flex-col gap-4'>
-            <h1 className='text-center mt-7 text-2xl font-semibold  '>Your Listings</h1>
-            {userListings.map((listing) => (
-              <div
-                key={listing._id}
-                className=" border rounded-lg p-3 flex justify-between items-center hover:scale-110 transition-transform duration-300 gap-4"
+      {userListings && userListings.length > 0 && (
+        <div className="flex flex-col gap-4">
+          <h1 className="text-center mt-7 text-2xl font-semibold  ">
+            Your Listings
+          </h1>
+          {userListings.map((listing) => (
+            <div
+              key={listing._id}
+              className=" border rounded-lg p-3 flex justify-between items-center hover:scale-110 transition-transform duration-300 gap-4"
+            >
+              <Link to={`/listing/${listing._id}`}>
+                <img
+                  src={listing.imageUrls[0]}
+                  alt="listing cover"
+                  className="h-16 w-24 object-cover "
+                />
+              </Link>
+              <Link
+                className="text-slate-700 font-semibold flex-1 hover:underline truncate"
+                to={`/listing/${listing._id}`}
               >
-                <Link to={`/listing/${listing._id}`}>
-                  <img
-                    src={listing.imageUrls[0]}
-                    alt="listing cover"
-                    className="h-16 w-24 object-cover "
-                  />
-                </Link>
-                <Link
-                  className="text-slate-700 font-semibold flex-1 hover:underline truncate"
-                  to={`/listing/${listing._id}`}
+                <p>{listing.name}</p>
+              </Link>
+
+              <div className="flex flex-col gap-3 ">
+                <button
+                  onClick={() => handleListingDelete(listing._id)}
+                  className="hover:scale-125 transition-transform duration-300"
                 >
-                  <p>{listing.name}</p>
-                </Link>
-    
-                <div className="flex flex-col gap-3 ">
-                  <button className="hover:scale-125 transition-transform duration-300">
-                    <AiOutlineDelete />
-                  </button>
-                  <button className="hover:scale-125 transition-transform duration-300">
-                    <AiOutlineEdit />
-                  </button>
-                </div>
+                  <AiOutlineDelete />
+                </button>
+                <button className="hover:scale-125 transition-transform duration-300">
+                  <AiOutlineEdit />
+                </button>
               </div>
-            ))}
-          </div>
-        }
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
