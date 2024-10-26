@@ -22,6 +22,7 @@ import { AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
 
 export default function Profile() {
   const fileRef = useRef(null);
+  const listingsRef = useRef(null);
   const { currentUser, loading, error } = useSelector((state) => state.user);
   const [file, setFile] = useState(undefined);
   const [filePerc, setFilePerc] = useState(0);
@@ -123,21 +124,21 @@ export default function Profile() {
     }
   };
 
-  const handleShowListing = async () => {
-    try {
-      setShowListingError(false);
-      const res = await fetch(`/api/user/listings/${currentUser._id}`);
-      const data = await res.json();
-      if (data.success === false) {
-        setShowListingError(true);
-        return;
-      }
-      setUserListing(data);
-    } catch (error) {
-      console.log(error);
-      setShowListingError(true);
-    }
-  };
+  // const handleShowListing = async () => {
+  //   try {
+  //     setShowListingError(false);
+  //     const res = await fetch(`/api/user/listings/${currentUser._id}`);
+  //     const data = await res.json();
+  //     if (data.success === false) {
+  //       setShowListingError(true);
+  //       return;
+  //     }
+  //     setUserListing(data);
+  //   } catch (error) {
+  //     console.log(error);
+  //     setShowListingError(true);
+  //   }
+  // };
 
   const handleListingDelete = async (listingId) => {
     try {
@@ -155,6 +156,26 @@ export default function Profile() {
       );
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const handleShowListing = async () => {
+    try {
+      setShowListingError(false);
+      const res = await fetch(`/api/user/listings/${currentUser._id}`);
+      const data = await res.json();
+      if (data.success === false) {
+        setShowListingError(true);
+        return;
+      }
+      setUserListing(data);
+      
+      setTimeout(() => {
+        listingsRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    } catch (error) {
+      console.log(error);
+      setShowListingError(true);
     }
   };
 
@@ -248,7 +269,7 @@ export default function Profile() {
       </p>
 
       {userListings && userListings.length > 0 && (
-        <div className="flex flex-col gap-4">
+        <div ref={listingsRef} className="flex flex-col gap-4">
           <h1 className="text-center mt-7 text-2xl font-semibold  ">
             Your Listings
           </h1>
