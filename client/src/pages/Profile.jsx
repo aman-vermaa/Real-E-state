@@ -278,9 +278,11 @@ export default function Profile() {
                 >
                   <AiOutlineDelete />
                 </button>
-                <button className="hover:scale-125 transition-transform duration-300">
-                  <AiOutlineEdit />
-                </button>
+                <Link to={`/update-listing/${listing._id}`}>
+                  <button className="hover:scale-125 transition-transform duration-300">
+                    <AiOutlineEdit />
+                  </button>
+                </Link>
               </div>
             </div>
           ))}
