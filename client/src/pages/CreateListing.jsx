@@ -281,27 +281,31 @@ export default function CreateListing() {
               />
               <div className="flex flex-col items-center">
                 <p>Regular price</p>
-                <span className="text-xs">(₹/month)</span>
+                {formData.type === "rent" && (
+                  <span className="text-xs">(₹ / month)</span>
+                )}
               </div>
             </div>
-             {formData.offer && (
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      id="discountedPrice"
-                      required
-                      min="0"
-                      max="1000000"
-                      className="p-3 border border-gray-300 rounded-lg"
-                      onChange={handleChange}
-                      value={formData.discountedPrice}
-                    />
-                    <div className="flex flex-col items-center">
-                      <p>Discounted price</p>
-                      <span className="text-xs">(₹/month)</span>
-                    </div>
-                  </div>
-             )}
+            {formData.offer && (
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  id="discountedPrice"
+                  required
+                  min="0"
+                  max="1000000"
+                  className="p-3 border border-gray-300 rounded-lg"
+                  onChange={handleChange}
+                  value={formData.discountedPrice}
+                />
+                <div className="flex flex-col items-center">
+                  <p>Discounted price</p>
+                    {formData.type === "rent" && (
+                      <span className="text-xs">(₹ / month)</span>
+                    )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex flex-col flex-1 gap-4">
@@ -352,7 +356,10 @@ export default function CreateListing() {
                 </button>
               </div>
             ))}
-          <button disabled={loading || uploading} className="p-3 my-3 bg-slate-700 rounded-lg text-white uppercase hover:opacity-95 disabled:opacity-80">
+          <button
+            disabled={loading || uploading}
+            className="p-3 my-3 bg-slate-700 rounded-lg text-white uppercase hover:opacity-95 disabled:opacity-80"
+          >
             {loading ? "Creating" : "Create Listing"}
           </button>
           {error && <p className="text-red-700 text-sm">{error}</p>}
