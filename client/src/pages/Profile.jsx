@@ -124,21 +124,6 @@ export default function Profile() {
     }
   };
 
-  // const handleShowListing = async () => {
-  //   try {
-  //     setShowListingError(false);
-  //     const res = await fetch(`/api/user/listings/${currentUser._id}`);
-  //     const data = await res.json();
-  //     if (data.success === false) {
-  //       setShowListingError(true);
-  //       return;
-  //     }
-  //     setUserListing(data);
-  //   } catch (error) {
-  //     console.log(error);
-  //     setShowListingError(true);
-  //   }
-  // };
 
   const handleListingDelete = async (listingId) => {
     try {
