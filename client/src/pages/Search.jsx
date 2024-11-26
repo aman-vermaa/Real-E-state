@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import ListingItem from "./ListingItem";
 
 export default function Search() {
   const [sideBarData, setSideBarData] = useState({
@@ -13,9 +14,9 @@ export default function Search() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [listing, setListings] = useState([]);
+  const [listings, setListings] = useState([]);
 
-  console.log(listing);
+  console.log(listings);
 
   const navigate = useNavigate();
 
@@ -56,7 +57,6 @@ export default function Search() {
       setLoading(false);
     };
     fetchListings();
-
   }, [location.search]);
 
   const handleChange = (e) => {
@@ -84,27 +84,27 @@ export default function Search() {
       });
     }
 
-    if(e.target.id === 'sort_order'){
-        const sort = e.target.value.split('_')[0] || 'created_at';
-        const order = e.target.value.split('_')[1] || 'desc';
-        setSideBarData({...sideBarData, sort, order});
+    if (e.target.id === "sort_order") {
+      const sort = e.target.value.split("_")[0] || "created_at";
+      const order = e.target.value.split("_")[1] || "desc";
+      setSideBarData({ ...sideBarData, sort, order });
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const urlParams = new URLSearchParams();
-    urlParams.set('searchTerm', sideBarData.searchTerm);
-    urlParams.set('type', sideBarData.type);
-    urlParams.set('parking', sideBarData.parking);
-    urlParams.set('furnished', sideBarData.furnished);
-    urlParams.set('offer', sideBarData.offer);
-    urlParams.set('sort', sideBarData.sort);
-    urlParams.set('order', sideBarData.order);
+    urlParams.set("searchTerm", sideBarData.searchTerm);
+    urlParams.set("type", sideBarData.type);
+    urlParams.set("parking", sideBarData.parking);
+    urlParams.set("furnished", sideBarData.furnished);
+    urlParams.set("offer", sideBarData.offer);
+    urlParams.set("sort", sideBarData.sort);
+    urlParams.set("order", sideBarData.order);
     const searchQuery = urlParams.toString();
 
     navigate(`/search?${searchQuery}`);
-  }
+  };
 
   return (
     <div className="flex flex-col md:flex-row">
@@ -212,10 +212,24 @@ export default function Search() {
           </button>
         </form>
       </div>
-      <div className="">
+      <div className="flex-1">
         <h1 className="text-3xl font-semibold border-b p-3 mt-5 text-slate-700">
           Listing results:
         </h1>
+        <div className="p-7 flex flex-wrap gap-4">
+          {!loading && listings.length === 0 && (
+            <p className="text-xl text-slate-700">No listing found!</p>
+          )}
+          {loading && (
+            <p className="text-xl text-slate-700 text-center w-full">
+              Loading...
+            </p>
+          )}
+
+          {!loading && listings && listings.map((listing) => 
+            <ListingItem key={listing._id} listing={listing}/>
+          )}
+        </div>
       </div>
     </div>
   );
